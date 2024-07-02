@@ -112,3 +112,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Datasets
+/data
+
+# Training and Testing Logs
+/log

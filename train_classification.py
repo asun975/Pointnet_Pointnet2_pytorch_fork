@@ -19,6 +19,9 @@ from pathlib import Path
 from tqdm import tqdm
 from data_utils.ModelNetDataLoader import ModelNetDataLoader
 
+from timeit import default_timer as timer
+from added_utils import print_train_time
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = BASE_DIR
 sys.path.append(os.path.join(ROOT_DIR, 'models'))
@@ -165,7 +168,12 @@ def main(args):
     best_class_acc = 0.0
 
     '''TRANING'''
+    # Empty lists for training accuracy and validation
+    train_acc_values = []
+    test_acc_values = []
+    class_acc_values = []
     logger.info('Start training...')
+    train_time_start = timer()
     for epoch in range(start_epoch, args.epoch):
         log_string('Epoch %d (%d/%s):' % (global_epoch + 1, epoch + 1, args.epoch))
         mean_correct = []
@@ -197,6 +205,7 @@ def main(args):
 
         train_instance_acc = np.mean(mean_correct)
         log_string('Train Instance Accuracy: %f' % train_instance_acc)
+        train_acc_values.append(train_instance_acc)
 
         with torch.no_grad():
             instance_acc, class_acc = test(classifier.eval(), testDataLoader, num_class=num_class)
@@ -209,6 +218,8 @@ def main(args):
                 best_class_acc = class_acc
             log_string('Test Instance Accuracy: %f, Class Accuracy: %f' % (instance_acc, class_acc))
             log_string('Best Instance Accuracy: %f, Class Accuracy: %f' % (best_instance_acc, best_class_acc))
+            test_acc_values.append(instance_acc)
+            class_acc_values.append(class_acc)
 
             if (instance_acc >= best_instance_acc):
                 logger.info('Save model...')
@@ -223,10 +234,22 @@ def main(args):
                 }
                 torch.save(state, savepath)
             global_epoch += 1
-
+    # Calculate training time
+    train_time_end = timer()
+    total_train_time_model = print_train_time(
+        start=train_time_start,
+        end= train_time_end,
+        device='cpu' if args.use_cpu else 'gpu'
+    )
     logger.info('End of training...')
-
+    results = {
+        "train_acc": train_acc_values,
+        "test_acc": test_acc_values,
+        "class_acc": class_acc_values
+    }
+    return results
 
 if __name__ == '__main__':
     args = parse_args()
-    main(args)
+    training_results = main(args)
+    print(training_results)
