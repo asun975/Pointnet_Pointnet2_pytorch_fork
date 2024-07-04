@@ -20,7 +20,7 @@ from tqdm import tqdm
 from data_utils.ModelNetDataLoader import ModelNetDataLoader
 
 from timeit import default_timer as timer
-from added_utils import print_train_time
+from added_utils import print_train_time, plot_loss_curves
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = BASE_DIR
@@ -172,6 +172,7 @@ def main(args):
     train_acc_values = []
     test_acc_values = []
     class_acc_values = []
+    
     logger.info('Start training...')
     train_time_start = timer()
     for epoch in range(start_epoch, args.epoch):
@@ -205,7 +206,7 @@ def main(args):
 
         train_instance_acc = np.mean(mean_correct)
         log_string('Train Instance Accuracy: %f' % train_instance_acc)
-        train_acc_values.append(train_instance_acc)
+        train_acc_values.append(train_instance_acc*100)
 
         with torch.no_grad():
             instance_acc, class_acc = test(classifier.eval(), testDataLoader, num_class=num_class)
@@ -218,8 +219,8 @@ def main(args):
                 best_class_acc = class_acc
             log_string('Test Instance Accuracy: %f, Class Accuracy: %f' % (instance_acc, class_acc))
             log_string('Best Instance Accuracy: %f, Class Accuracy: %f' % (best_instance_acc, best_class_acc))
-            test_acc_values.append(instance_acc)
-            class_acc_values.append(class_acc)
+            test_acc_values.append(instance_acc*100)
+            class_acc_values.append(class_acc*100)
 
             if (instance_acc >= best_instance_acc):
                 logger.info('Save model...')
@@ -253,3 +254,8 @@ if __name__ == '__main__':
     args = parse_args()
     training_results = main(args)
     print(training_results)
+    try:
+        plot_loss_curves(training_results)
+    except Exception as error:
+        print(error)
+        
