@@ -20,7 +20,7 @@ from tqdm import tqdm
 from data_utils.ModelNetDataLoader import ModelNetDataLoader
 
 from timeit import default_timer as timer
-from added_utils import print_train_time. plot_loss_curves
+from added_utils import print_train_time, plot_loss_curves
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = BASE_DIR
