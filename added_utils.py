@@ -19,7 +19,7 @@ def print_train_time(start, end, device=None):
 def plot_loss_curves(results):
     acc = results["train_acc"]
     test_accuracy = results["test_acc"]
-    class_accuracy = result["class_acc"]
+    class_accuracy = results["class_acc"]
     epochs = range(len(results["train_acc"]))
 
     plt.figure(figsize=(15, 7))
