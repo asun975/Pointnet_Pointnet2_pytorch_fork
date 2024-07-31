@@ -3,6 +3,7 @@
 @file: ModelNet.py
 @time: 2021/3/19 15:51
 '''
+import argparse
 import os
 import numpy as np
 import warnings
@@ -138,9 +139,30 @@ class ModelNetDataLoader(Dataset):
 
 if __name__ == '__main__':
     import torch
+    
+    def parse_args():
+        parser = argparse.ArgumentParser('training')
+        parser.add_argument('--use_cpu', action='store_true', default=False, help='use cpu mode')
+        parser.add_argument('--gpu', type=str, default='0', help='specify gpu device')
+        parser.add_argument('--batch_size', type=int, default=24, help='batch size in training')
+        parser.add_argument('--model', default='pointnet_cls', help='model name [default: pointnet_cls]')
+        parser.add_argument('--num_category', default=10, type=int, choices=[3, 10, 40],  help='training on 3 labels or use modelnet10/40')
+        parser.add_argument('--epoch', default=200, type=int, help='number of epoch in training')
+        parser.add_argument('--learning_rate', default=0.001, type=float, help='learning rate in training')
+        parser.add_argument('--num_point', type=int, default=1024, help='Point Number')
+        parser.add_argument('--optimizer', type=str, default='Adam', help='optimizer for training')
+        parser.add_argument('--log_dir', type=str, default=None, help='experiment root')
+        parser.add_argument('--decay_rate', type=float, default=1e-4, help='decay rate')
+        parser.add_argument('--use_normals', action='store_true', default=False, help='use normals')
+        parser.add_argument('--process_data', action='store_true', default=False, help='save data offline')
+        parser.add_argument('--use_uniform_sample', action='store_true', default=False, help='use uniform sampiling')
+        return parser.parse_args()
 
-    data = ModelNetDataLoader('/data/modelnet40_normal_resampled/', split='train')
+    args = parse_args()
+
+    data = ModelNetDataLoader(r"data\modelnet40_normal_resampled", split='train', args=args)
     DataLoader = torch.utils.data.DataLoader(data, batch_size=12, shuffle=True)
     for point, label in DataLoader:
         print(point.shape)
+        print(point)
         print(label.shape)
