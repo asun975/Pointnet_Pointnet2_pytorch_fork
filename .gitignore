@@ -114,10 +114,10 @@ dmypy.json
 .pyre/
 
 # Datasets
-/data
+/data/
 
 # Training and Testing Logs
-/log
+/log/
 
 /data_utils/CustomDataLoader.py
 train_classification_copy.py
